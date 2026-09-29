@@ -1,0 +1,76 @@
+<header class="hero">
+  <div class="hero-inner">
+    <div class="terminal">
+      <div class="terminal-bar">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+      </div>
+      <div class="terminal-body">
+        <p class="line"><span class="prompt">$</span> radar --query "{{ data.keyword || 'devops' }}" --remote --min-score {{ data.min_score || 70 }}</p>
+        <p class="line dim">{{ data.total_analysees || 0 }} offres analysées · dernière analyse : {{ data.updated_at || 'jamais lancée' }}</p>
+      </div>
+    </div>
+
+    <h1>Radar Emploi<span class="accent">.</span></h1>
+    <p class="subtitle">Chaque offre passe par le même contrôle qu'un déploiement : elle est évaluée, notée, et seules celles qui passent le seuil obtiennent leur lettre de motivation prête à l'envoi.</p>
+
+    <form class="refresh-form" (ngSubmit)="onRefresh()">
+      <input type="password" name="token" [(ngModel)]="token" placeholder="Token de rafraîchissement" autocomplete="off">
+      <button type="submit" [disabled]="refreshing">
+        {{ refreshing ? 'Analyse en cours…' : 'Lancer une nouvelle analyse' }}
+      </button>
+    </form>
+    <p class="refresh-message" aria-live="polite">{{ refreshMessage }}</p>
+    <p class="refresh-message error" *ngIf="loadError">{{ loadError }}</p>
+  </div>
+</header>
+
+<main class="results">
+  <ng-container *ngIf="data.offres.length === 0; else list">
+    <div class="empty">
+      <p class="empty-title">Aucune analyse pour l'instant.</p>
+      <p class="empty-body">Lance une première analyse avec le token ci-dessus pour voir apparaître les offres ici.</p>
+    </div>
+  </ng-container>
+
+  <ng-template #list>
+    <div class="results-header">
+      <span>Offre</span>
+      <span>Score</span>
+    </div>
+
+    <article class="row" [ngClass]="'status-' + statusFor(job)" *ngFor="let job of data.offres; let i = index">
+      <div class="row-bar"></div>
+      <div class="row-main">
+        <div class="row-top">
+          <h2>{{ job.title }}</h2>
+          <span class="score" [ngClass]="'score-' + statusFor(job)">{{ job.score }}</span>
+        </div>
+        <p class="company">{{ job.company }} <span class="dim">· {{ job.source }}</span></p>
+
+        <div class="tags" *ngIf="job.tags?.length">
+          <span class="tag" *ngFor="let tag of job.tags">{{ tag }}</span>
+        </div>
+
+        <p class="detail" *ngIf="job.points_forts?.length">
+          <strong>Points forts :</strong> {{ job.points_forts.join(', ') }}
+        </p>
+        <p class="detail" *ngIf="job.competences_manquantes?.length">
+          <strong>À combler :</strong> {{ job.competences_manquantes.join(', ') }}
+        </p>
+
+        <div class="row-actions">
+          <a [href]="job.url" target="_blank" rel="noopener" class="btn-apply">Voir l'offre</a>
+          <button class="btn-letter" *ngIf="job.lettre" (click)="toggleLetter(i)">Voir la lettre</button>
+        </div>
+
+        <div class="letter" [class.open]="openLetterIndex === i" *ngIf="job.lettre">
+          <pre>{{ job.lettre }}</pre>
+        </div>
+      </div>
+    </article>
+  </ng-template>
+</main>
+
+<footer>
+  <p>Radar Emploi — outil personnel de veille DevOps. Aucune candidature n'est envoyée automatiquement.</p>
+</footer>

@@ -1,0 +1,21 @@
+:root {
+  --bg: #0D1117;
+  --surface: #161B22;
+  --border: #262C36;
+  --text: #E6EDF3;
+  --text-dim: #8B949E;
+  --pass: #3FB950;
+  --warn: #D29922;
+  --fail: #F85149;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  font-family: 'Manrope', sans-serif;
+}
